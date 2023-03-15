@@ -80,28 +80,58 @@ def control_algorithm(data,ser):
     # elif pack_voltage <= 6.4:
     #     stop()
 
-    float tolerance = 0.05 #setting tolerance as 5%
+#     float tolerance = 0.05 #setting tolerance as 5%
 
-    if ( cell_1_voltage < 3.2 or cell_2_voltage < 3.2 ) and 15 < cell_1_temperature < 40 and 15 < cell_2_temperature <40 :
+#     if ( cell_1_voltage < 3.2 or cell_2_voltage < 3.2 ) and 15 < cell_1_temperature < 40 and 15 < cell_2_temperature <40 :
 
-        while cell_1_voltage < 3.6 or cell_2_voltage < 3.6:
-            charge()
-    else:
-        stop()
+#         while cell_1_voltage < 3.6 or cell_2_voltage < 3.6:
+#             charge()
+#     else:
+#         stop()
 
-    if cell_1_voltage > cell_2_voltage: 
-        Balance_1()
-    elif cell_2_voltage > cell_1_voltage :
-            Balance_2()
+#     if cell_1_voltage > cell_2_voltage: 
+#         Balance_1()
+#     elif cell_2_voltage > cell_1_voltage :
+#             Balance_2()
 
-    elif cell_1_voltage == cell_2_voltage :
+#     elif cell_1_voltage == cell_2_voltage :
          
-         if cell_1_voltage > 3.6 and cell_2_voltage > 3.6:
-             Balance_1()
-             Balance_2()
+#          if cell_1_voltage > 3.6 and cell_2_voltage > 3.6:
+#              Balance_1()
+#              Balance_2()
     
-    else :
-        stop()
+#     else :
+#         stop()
+
+
+    charge_state = "undercharged"
+
+    # Check if charging is needed
+    if (charge_state == "undercharged" and (cell_1_voltage < 3.2 or cell_2_voltage < 3.2 or pack_voltage < 6.4)):
+    
+        charge()          
+    charge_state = "charging"
+
+    # Check if charging is complete
+    if (charge_state == "charging" and cell_1_voltage >= 3.6 and cell_2_voltage >= 3.6):
+    # Turn off charging
+        charge_state = "charged"
+
+    # Check if balancing is needed
+    if (charge_state == "charged" and abs(cell_1_voltage - cell_2_voltage) > 0.01):
+    # Balance cell with more voltage
+        if (cell_1_voltage > cell_2_voltage):
+            Balance_1()
+            cell_2_voltage += 0.01
+        else:
+            Balance_2()
+            cell_1_voltage += 0.01
+
+    # Check if balancing is complete
+    if (charge_state == "charged" and abs(cell_1_voltage - cell_2_voltage) <= 0.01 and cell_1_voltage >= 3.57 and cell_2_voltage >= 3.57):
+        cell_state = "balanced"
+
+    stop()
 
  
     
